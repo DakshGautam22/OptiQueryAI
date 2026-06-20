@@ -1,0 +1,282 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+
+  /* Light Theme HSL Values */
+  --background: 220 20% 97%;
+  --foreground: 224 71.4% 4.1%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 71.4% 4.1%;
+
+  --primary: 263.4 70% 50.4%;
+  --primary-foreground: 210 20% 98%;
+
+  --secondary: 190 90% 40%;
+  --secondary-foreground: 210 20% 98%;
+
+  --muted: 220 14.3% 90%;
+  --muted-foreground: 220 8.9% 46.1%;
+
+  --accent: 262.1 83.3% 95.3%;
+  --accent-foreground: 262.1 83.3% 30%;
+
+  --border: 220 13% 91%;
+  --ring: 263.4 70% 50.4%;
+
+  --radius: 0.75rem;
+
+  /* Glassmorphism Styles */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: rgba(31, 38, 135, 0.08);
+}
+
+[data-theme="dark"] {
+  /* Dark Theme HSL Values (Obsidian Slate Theme) */
+  --background: 224 71% 4%;
+  --foreground: 210 20% 98%;
+
+  --card: 224 71% 7%;
+  --card-foreground: 210 20% 98%;
+
+  --primary: 263.4 90% 60%;
+  --primary-foreground: 210 20% 98%;
+
+  --secondary: 190 95% 50%;
+  --secondary-foreground: 224 71% 4%;
+
+  --muted: 224 71% 12%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+
+  --accent: 263.4 50% 15%;
+  --accent-foreground: 210 20% 98%;
+
+  --border: 224 71% 12%;
+  --ring: 263.4 90% 60%;
+
+  /* Dark Glassmorphism */
+  --glass-bg: rgba(10, 12, 22, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+}
+
+* {
+  border-color: hsl(var(--border));
+  font-family: var(--font-outfit), sans-serif;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  overflow-x: hidden;
+}
+
+/* Glassmorphism helper utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 12px 40px 0 rgba(168, 85, 247, 0.05);
+}
+
+/* Input elements focus styling */
+input,
+select,
+textarea {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  box-shadow: 0 0 14px 0 rgba(168, 85, 247, 0.15) !important;
+  background-color: rgba(5, 5, 10, 0.8) !important;
+}
+
+/* Custom premium buttons */
+.btn-premium-primary {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 80% 50%) 100%);
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 15px 0 rgba(168, 85, 247, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-premium-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(168, 85, 247, 0.35);
+  filter: brightness(1.05);
+}
+
+.btn-premium-primary:active {
+  transform: translateY(1px);
+}
+
+.glow-text {
+  background: linear-gradient(135deg, #fff 30%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.15));
+}
+
+/* Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.3);
+}
+
+/* Premium Light Mode Overrides */
+[data-theme="light"] {
+  /* Ambient light radial glows */
+  --glow-bg-1: rgba(168, 85, 247, 0.04);
+  --glow-bg-2: rgba(99, 102, 241, 0.04);
+
+  /* Scrollbars in light mode */
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1) !important;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 85, 247, 0.4) !important;
+  }
+
+  /* Override hardcoded tailwind bg classes */
+  .bg-slate-950 {
+    background-color: #f8fafc !important; /* slate-50 */
+  }
+  .bg-slate-950\/20,
+  .bg-slate-950\/40,
+  .bg-slate-950\/60,
+  .bg-slate-900\/10,
+  .bg-slate-950\/25,
+  .bg-slate-950\/10 {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  .bg-slate-900 {
+    background-color: #ffffff !important; /* white */
+  }
+  .bg-slate-900\/30,
+  .bg-slate-900\/40,
+  .bg-slate-900\/5,
+  .bg-slate-850\/40 {
+    background-color: #f1f5f9 !important; /* slate-100 */
+  }
+
+  /* Override borders */
+  .border-slate-900,
+  .border-slate-900\/60,
+  .border-slate-850,
+  .border-slate-800,
+  .border-slate-800\/80,
+  .border-slate-850\/40,
+  .border-slate-855 {
+    border-color: #e2e8f0 !important; /* slate-200 */
+  }
+
+  /* Override text colors */
+  .text-slate-100,
+  .text-slate-150,
+  .text-slate-200,
+  .text-slate-300,
+  .text-white {
+    color: #0f172a !important; /* slate-900 */
+  }
+  .text-slate-350,
+  .text-slate-400,
+  .text-slate-450 {
+    color: #334155 !important; /* slate-700 */
+  }
+  .text-slate-500,
+  .text-slate-550,
+  .text-slate-600,
+  .text-slate-655 {
+    color: #64748b !important; /* slate-500 */
+  }
+
+  /* Override custom components */
+  .glow-text {
+    background: linear-gradient(135deg, #0f172a 30%, #7c3aed 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+  
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-color: rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+  }
+  
+  .glass-panel:hover {
+    border-color: rgba(168, 85, 247, 0.3) !important;
+  }
+
+  /* Sidebar fixes */
+  aside {
+    background-color: #ffffff !important;
+    border-right-color: #e2e8f0 !important;
+  }
+
+  aside .hover\:bg-slate-900\/30:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Chat bubble fixes */
+  .bg-purple-600\/15 {
+    background-color: rgba(168, 85, 247, 0.08) !important;
+    border-color: rgba(168, 85, 247, 0.2) !important;
+    color: #0f172a !important;
+  }
+
+  .bg-purple-600\/10 {
+    background-color: rgba(168, 85, 247, 0.06) !important;
+  }
+
+  /* Code Editor light mode style overrides */
+  .cm-editor {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+  }
+
+  .cm-gutters {
+    background-color: #f1f5f9 !important;
+    border-right-color: #e2e8f0 !important;
+  }
+  
+  /* Select inputs, lists, inputs */
+  select, input, textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  select:focus, input:focus, textarea:focus {
+    border-color: rgba(168, 85, 247, 0.5) !important;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.1) !important;
+  }
+}

@@ -1,10 +1,29 @@
-# OptiQuery AI
+# OptiQuery AI 🚀
 
 [![CI/CD Pipeline](https://github.com/DakshGautam22/OptiQueryAI/actions/workflows/ci.yml/badge.svg)](https://github.com/DakshGautam22/OptiQueryAI/actions/workflows/ci.yml)
 
-OptiQuery AI is a production-grade Natural Language to SQL (NL-to-SQL) SaaS platform and Query Optimization Engine. It harnesses a multi-agent AI pipeline to translate conversational business questions into syntactically validated, highly optimized SQL queries, executes them against securely integrated databases, and returns rich paginated tables and charting visualizations.
+**Talk to your database in plain English.** OptiQuery AI is an intelligent Natural Language to SQL (NL-to-SQL) platform that translates everyday business questions into precise, optimized SQL queries, executes them securely, and displays the results in beautiful charts and tables.
 
 ---
+
+## 🌟 Key Features
+
+*   🗣️ **Natural Language Queries**: No SQL knowledge required. Ask questions like *"Who are our top 5 customers by sales this month?"* and get answers instantly.
+*   🤖 **Smart Multi-Agent Pipeline**: Six specialized AI agents work together to verify intents, fetch schemas, generate draft SQL, validate query safety, optimize performance, and explain the logic in simple terms.
+*   📊 **Visual Results**: Instantly render raw database rows as interactive data tables and charting visualizations.
+*   🔒 **Secure by Design**: Credentials are protected using AES-256 encryption. Query execution is restricted to safe, read-only queries.
+
+---
+
+## 🧭 How It Works
+
+```
+1. Ask a Question ────────> 2. AI Multi-Agent Pipeline ────────> 3. Secure Execution ────────> 4. Visualize Results
+  (Plain English)             (DDL Retrieval & Validation)        (Safe Read-Only DB Run)      (Charts & Tables)
+```
+
+---
+
 
 ## Architecture
 

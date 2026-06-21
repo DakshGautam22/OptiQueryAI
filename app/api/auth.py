@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.database import get_async_session
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, verify_token
+from app.core.dependencies import get_current_user
 from app.models.organization import Organization, PlanEnum
 from app.models.user import User, RoleEnum
 import uuid
@@ -128,6 +129,12 @@ async def login(
             detail="Incorrect email or password"
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account has been deactivated. Please contact your administrator."
+        )
+
     # Generate tokens
     access_token = create_access_token(user.id, user.role.value)
     refresh_token = create_refresh_token(user.id)
@@ -207,3 +214,47 @@ async def logout(response: Response):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return {"message": "Logged out successfully"}
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.get("/me")
+async def get_me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_session)
+):
+    """Retrieve details of the authenticated user and their organization."""
+    from sqlalchemy.orm import selectinload
+    stmt = select(User).options(selectinload(User.organization)).where(User.id == current_user.id)
+    result = await db.execute(stmt)
+    user = result.scalar_one()
+    
+    return {
+        "id": user.id,
+        "email": user.email,
+        "role": user.role.value,
+        "org_name": user.organization.name,
+        "org_plan": user.organization.plan.value,
+        "created_at": user.created_at
+    }
+
+
+@router.post("/change-password")
+async def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_async_session)
+):
+    """Validate current password and modify user password credentials."""
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password."
+        )
+        
+    current_user.password_hash = hash_password(payload.new_password)
+    await db.commit()
+    return {"message": "Password changed successfully."}

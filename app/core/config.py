@@ -31,6 +31,8 @@ class Settings(BaseSettings):
 
     # OpenAI API configuration
     OPENAI_API_KEY: str = Field(default="sk-proj-placeholderopenapikeyforoptiqueryai")
+    OPENAI_MODEL: str = Field(default="gpt-4o-mini")
+    OPENAI_BASE_URL: str | None = Field(default=None)
 
     # Vector store config
     CHROMA_PERSIST_DIRECTORY: str = Field(default="./chroma_db")

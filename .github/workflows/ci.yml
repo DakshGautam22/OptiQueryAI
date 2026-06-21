@@ -1,0 +1,116 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest pytest-asyncio aiosqlite
+          pip install .
+
+      - name: Run Ruff Lint Check
+        run: ruff check app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run ESLint Verification
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run Pytest Unit Tests
+        env:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          JWT_SECRET_KEY: test_secret_key_32_bytes_long_minimum_length_required_by_jose
+          DATABASE_ENCRYPTION_KEY: placeholder_32_byte_base64_encryption_key_for_db_creds=
+          CREDENTIAL_ENCRYPTION_KEY: placeholder_32_byte_base64_encryption_key_for_db_creds=
+        run: pytest tests/unit
+
+      - name: Run Pytest Integration Tests
+        env:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          JWT_SECRET_KEY: test_secret_key_32_bytes_long_minimum_length_required_by_jose
+          DATABASE_ENCRYPTION_KEY: placeholder_32_byte_base64_encryption_key_for_db_creds=
+          CREDENTIAL_ENCRYPTION_KEY: placeholder_32_byte_base64_encryption_key_for_db_creds=
+        run: pytest tests/integration tests/test_database.py
+
+      - name: Test Build Backend Docker Image
+        run: docker build -f backend/Dockerfile -t optiquery-backend:test .
+
+      - name: Test Build Frontend Docker Image
+        run: docker build -f frontend/Dockerfile -t optiquery-frontend:test ./frontend
+
+  publish:
+    needs: lint-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and Push Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/frontend:latest
+            ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -42,6 +42,16 @@ async def test_connection(
         except Exception as e:
             return False, f"MySQL Port unreachable: {str(e)}"
             
+    elif db_type == "sqlite":
+        try:
+            import aiosqlite
+            # database_name is the SQLite database file path
+            async with aiosqlite.connect(database_name) as conn:
+                await conn.execute("SELECT 1")
+            return True, ""
+        except Exception as e:
+            return False, f"SQLite Connection Error: {str(e)}"
+
     return False, f"Unsupported database type: {db_type}"
 
 
@@ -148,4 +158,47 @@ async def introspect_schema(
         # Return an empty list for safety or basic test template
         pass
         
+    elif db_type == "sqlite":
+        try:
+            import aiosqlite
+            async with aiosqlite.connect(database_name) as conn:
+                conn.row_factory = aiosqlite.Row
+                
+                # Fetch tables
+                tables_cursor = await conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';"
+                )
+                tables = [r["name"] for r in await tables_cursor.fetchall()]
+                
+                for table in tables:
+                    # Fetch columns info for table
+                    columns_cursor = await conn.execute(f"PRAGMA table_info('{table}');")
+                    columns = await columns_cursor.fetchall()
+                    
+                    # Fetch foreign keys for table
+                    fks_cursor = await conn.execute(f"PRAGMA foreign_key_list('{table}');")
+                    fks = await fks_cursor.fetchall()
+                    foreign_keys = {r["from"]: (r["table"], r["to"]) for r in fks}
+                    
+                    for col in columns:
+                        col_name = col["name"]
+                        data_type = col["type"]
+                        is_pk = bool(col["pk"])
+                        is_fk = col_name in foreign_keys
+                        ref_tbl = foreign_keys[col_name][0] if is_fk else None
+                        ref_col = foreign_keys[col_name][1] if is_fk else None
+                        
+                        schema_list.append(SchemaMetadata(
+                            connection_id=connection_id,
+                            table_name=table,
+                            column_name=col_name,
+                            data_type=data_type,
+                            is_pk=is_pk,
+                            is_fk=is_fk,
+                            ref_table=ref_tbl,
+                            ref_column=ref_col
+                        ))
+        except Exception as e:
+            raise
+
     return schema_list

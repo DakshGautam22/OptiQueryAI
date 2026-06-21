@@ -1,14 +1,21 @@
 import enum
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Integer, LargeBinary, Boolean, DateTime, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
+if TYPE_CHECKING:
+    from app.models.organization import Organization
+    from app.models.schema_metadata import SchemaMetadata
+    from app.models.query_history import QueryHistory
+    from app.models.audit_log import AuditLog
+
 class DBTypeEnum(str, enum.Enum):
     postgresql = "postgresql"
     mysql = "mysql"
+    sqlite = "sqlite"
 
 class DatabaseConnection(Base):
     __tablename__ = "database_connections"

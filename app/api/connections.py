@@ -92,6 +92,11 @@ async def run_introspection_task(
                 db.add_all(schema_metadata_list)
             
             await db.commit()
+
+        # Trigger vector store schema indexing
+        if schema_metadata_list:
+            from app.rag.vector_store import VectorStoreService
+            VectorStoreService().index_schema(connection_id, schema_metadata_list)
     except Exception as e:
         # Silently fail background task to prevent crash (in real app, we log this to a file or monitor)
         pass
@@ -337,6 +342,11 @@ async def refresh_connection_schema(
             db.add_all(metadata_list)
         
         await db.commit()
+        
+        # Trigger vector store schema indexing
+        if metadata_list:
+            from app.rag.vector_store import VectorStoreService
+            VectorStoreService().index_schema(connection.id, metadata_list)
         
         # Query and return fresh records
         schema_result = await db.execute(

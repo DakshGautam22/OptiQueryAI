@@ -19,14 +19,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Get dialect
     dialect = op.get_bind().dialect.name
+    now_func = sa.text('now()') if dialect == 'postgresql' else sa.text('CURRENT_TIMESTAMP')
     
     # 1. Create enum types if postgresql
     if dialect == 'postgresql':
-        op.execute("CREATE TYPE plan_enum AS ENUM ('free', 'pro', 'enterprise')")
-        op.execute("CREATE TYPE role_enum AS ENUM ('admin', 'analyst', 'viewer')")
-        op.execute("CREATE TYPE db_type_enum AS ENUM ('postgresql', 'mysql')")
-        op.execute("CREATE TYPE chat_role_enum AS ENUM ('user', 'assistant')")
-        
         plan_enum_type = sa.Enum('free', 'pro', 'enterprise', name='plan_enum')
         role_enum_type = sa.Enum('admin', 'analyst', 'viewer', name='role_enum')
         db_type_enum_type = sa.Enum('postgresql', 'mysql', name='db_type_enum')
@@ -43,7 +39,7 @@ def upgrade() -> None:
         sa.Column('id', sa.UUID(), nullable=False),
         sa.Column('name', sa.String(length=255), nullable=False),
         sa.Column('plan', plan_enum_type, nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
 
@@ -54,8 +50,9 @@ def upgrade() -> None:
         sa.Column('email', sa.String(length=255), nullable=False),
         sa.Column('password_hash', sa.String(length=255), nullable=False),
         sa.Column('role', role_enum_type, nullable=False),
+        sa.Column('is_active', sa.Boolean(), server_default=sa.text('1'), nullable=False),
         sa.Column('org_id', sa.UUID(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.ForeignKeyConstraint(['org_id'], ['organizations.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -92,7 +89,7 @@ def upgrade() -> None:
         sa.Column('is_fk', sa.Boolean(), nullable=False),
         sa.Column('ref_table', sa.String(length=255), nullable=True),
         sa.Column('ref_column', sa.String(length=255), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.ForeignKeyConstraint(['connection_id'], ['database_connections.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -113,7 +110,7 @@ def upgrade() -> None:
         sa.Column('row_count', sa.Integer(), nullable=False),
         sa.Column('success', sa.Boolean(), nullable=False),
         sa.Column('error_message', sa.Text(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.ForeignKeyConstraint(['connection_id'], ['database_connections.id'], ondelete='CASCADE'),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
@@ -129,7 +126,7 @@ def upgrade() -> None:
         sa.Column('role', chat_role_enum_type, nullable=False),
         sa.Column('content', sa.Text(), nullable=False),
         sa.Column('sql_generated', sa.Text(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
@@ -148,7 +145,7 @@ def upgrade() -> None:
         sa.Column('success', sa.Boolean(), nullable=False),
         sa.Column('error_message', sa.Text(), nullable=True),
         sa.Column('ip_address', sa.String(length=45), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=now_func, nullable=False),
         sa.ForeignKeyConstraint(['connection_id'], ['database_connections.id'], ondelete='SET NULL'),
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='SET NULL'),
         sa.PrimaryKeyConstraint('id')

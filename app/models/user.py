@@ -1,7 +1,7 @@
 import enum
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime, ForeignKey, Enum as SQLEnum
+from sqlalchemy import String, DateTime, ForeignKey, Enum as SQLEnum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.models.base import Base
@@ -22,6 +22,7 @@ class User(Base):
         nullable=False, 
         default=RoleEnum.viewer
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     org_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("organizations.id", ondelete="CASCADE"), 
         nullable=False
